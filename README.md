@@ -1,5 +1,7 @@
 README
+
 Text Analysis with Google Sheets and Python
+
 This repository contains a Python script developed as part of my learning journey to explore how to integrate Google Sheets, text analysis, and AI-driven insights. The script is a combination of experiments with Google APIs, text cleaning, word frequency analysis, and OpenAI's GPT for summarising results.
 
 Please note: This script is not a polished, production-ready solution but a learning exercise. Feedback and suggestions are welcome to help improve the code and my understanding.
