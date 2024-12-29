@@ -1,0 +1,53 @@
+// Google Apps Script to extract quotes along with attribution from all rows of a sheet and store them in another sheet
+function extractQuotesWithAttribution() {
+  const sourceSheetName = 'FS_Main_Text'; // relace with your sheet name
+  const targetSheetName = 'Quotes'; // relace with your sheet name
+
+  // Open the spreadsheet and get the sheets
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const sourceSheet = spreadsheet.getSheetByName(sourceSheetName);
+  if (!sourceSheet) {
+    throw new Error(`Source sheet '${sourceSheetName}' not found.`);
+  }
+
+  let targetSheet = spreadsheet.getSheetByName(targetSheetName);
+  if (!targetSheet) {
+    targetSheet = spreadsheet.insertSheet(targetSheetName);
+    targetSheet.appendRow(['Date Received', 'Attribution', 'Quote']); // Add header row if the sheet is newly created
+  } else {
+    targetSheet.clear(); // Clear the sheet to avoid duplicate entries
+    targetSheet.appendRow(['Date Received', 'Attribution', 'Quote']); // Add header row
+  }
+
+  // Get all data from the source sheet
+  const data = sourceSheet.getDataRange().getValues();
+
+  // Extract quotes and their attribution
+  data.forEach(row => {
+    const dateReceived = row[0]; // First column contains the date
+    row.slice(1).forEach(cell => { // Skip the first column
+      if (typeof cell === 'string') {
+        const lines = cell.split('\n');
+
+        let currentAttribution = '';
+        lines.forEach((line, index) => {
+          // Check if line ends with a colon, indicating attribution
+          if (line.trim().endsWith(':')) {
+            currentAttribution = line.replace(/:$/, '').trim();
+          }
+
+          // Check if line contains a quote
+          const quotes = line.match(/"(.*?)"/g); // Find all quoted text in the line
+          if (quotes) {
+            quotes.forEach(quote => {
+              const cleanedQuote = quote.replace(/"/g, '').trim(); // Remove the quotes and trim whitespace
+              if (cleanedQuote.split(' ').length >= 3) { // Check if the quote has at least 3 words
+                targetSheet.appendRow([dateReceived, currentAttribution, cleanedQuote]);
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+}
