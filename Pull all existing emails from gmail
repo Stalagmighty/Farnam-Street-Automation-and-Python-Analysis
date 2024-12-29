@@ -1,15 +1,15 @@
 // Google Apps Script to search Gmail and log email data into Google Sheets (to be set up in the google sheet)
 
 function extractEmailsToSheet() {
-  const emailQuery = 'from:newsletter@farnamstreetblog.com';
-  const sheetName = 'FS_Main_Text';
+  const emailQuery = 'from:newsletter@farnamstreetblog.com'; # replace with your query
+  const sheetName = 'FS_Main_Text'; # replace with your sheet name
 
   // Open or create the sheet
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = spreadsheet.getSheetByName(sheetName);
   if (!sheet) {
     sheet = spreadsheet.insertSheet(sheetName);
-    sheet.appendRow(['Date Received', 'Email Body']);
+    sheet.appendRow(['Date Received', 'Email Body']); # replace with your headers
   }
 
   const threads = GmailApp.search(emailQuery);
