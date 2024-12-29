@@ -1,0 +1,47 @@
+// Google Apps Script to fetch emails and append to FS_Main_Text sheet
+function checkAndAppendEmails() {
+  const emailQuery = 'from:newsletter@farnamstreetblog.com newer_than:1d'; // Only fetch recent emails and replace with your query
+  const sheetName = 'FS_Main_Text'; // replace with your sheet name
+
+  // Open or create the sheet
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = spreadsheet.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(sheetName);
+    sheet.appendRow(['Date Received', 'Email Body']); // replace with your columns
+  }
+
+  const threads = GmailApp.search(emailQuery);
+  const messages = GmailApp.getMessagesForThreads(threads);
+
+  const existingData = sheet.getDataRange().getValues();
+  const existingDates = existingData.slice(1).map(row => row[0]); // Skip header row
+
+  messages.flat().forEach(message => {
+    const dateReceived = message.getDate();
+    const body = message.getBody(); // Retrieves the email body (HTML or plain text)
+
+    // Sanitize the body to remove HTML tags
+    const plainTextBody = stripHtml(body);
+
+    // Check if the email date already exists in the sheet
+    if (!existingDates.includes(dateReceived.toString())) {
+      sheet.appendRow([dateReceived, plainTextBody]);
+    }
+  });
+}
+
+// Function to remove HTML tags and decode HTML entities
+function stripHtml(html) {
+  // Remove HTML tags
+  let plainText = html.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim();
+
+  // Decode HTML entities
+  plainText = plainText.replace(/&quot;/g, '"') // Replace &quot; with "
+                       .replace(/&amp;/g, '&')  // Replace &amp; with &
+                       .replace(/&#39;/g, "'") // Replace &#39; with '
+                       .replace(/&lt;/g, '<')  // Replace &lt; with <
+                       .replace(/&gt;/g, '>'); // Replace &gt; with >
+
+  return plainText;
+}
